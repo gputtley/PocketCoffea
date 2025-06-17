@@ -56,14 +56,13 @@ class ExecutorFactoryCondorIC(ExecutorFactoryManualABC):
         abs_jobdir_path = os.path.abspath(self.jobs_dir)
         os.makedirs(f"{self.jobs_dir}/logs", exist_ok=True)
 
-
         script = f"""#!/bin/bash
 source /vols/grid/cms/setup.sh
 export X509_USER_PROXY={self.x509_path}
 export HOME={os.environ["HOME"]}
 export XRD_RUNFORKHANDLER=1
 export MALLOC_TRIM_THRESHOLD_=0
-export PYTHONPATH={os.getcwd()}:$PYTHONPATH
+export PYTHONPATH={':'.join([p for p in sys.path if p])}:$PYTHONPATH
 JOBDIR={abs_jobdir_path}"""
 
         # Conditionally add the conda environment path export
