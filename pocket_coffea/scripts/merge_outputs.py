@@ -13,7 +13,7 @@ from itertools import islice
 from functools import reduce
 
 
-def merge_outputs(inputfiles, outputfile, jobs_config=None, force=False):
+def merge_outputs(inputfiles, outputfile, jobs_config=None, force=False, allow_missing=False):
     '''Merge coffea output files'''
     if os.path.exists(outputfile) and not force:
         print(f"[red]Output file {outputfile} already exists. Use -f to overwrite it.")
@@ -58,10 +58,14 @@ def merge_outputs(inputfiles, outputfile, jobs_config=None, force=False):
             if not os.path.exists(job['output_file']):
                 print(f"[red]Job {job_name} output is missing[/]")
                 alldone = False
-            output_files.append(job['output_file'])
+            else:
+                output_files.append(job['output_file'])
         if not alldone:
             print(f"[red]Not all jobs are done yet[/]")
-            exit(1)
+            if not allow_missing:
+                exit(1)
+            else:
+                print(f"[yellow]Skipping missing jobs[/]")
         print(f"[green]All jobs are done[/]")
         print(output_files)
 
@@ -135,10 +139,16 @@ def merge_outputs(inputfiles, outputfile, jobs_config=None, force=False):
     is_flag=True,
     help="Overwrite output file if it exists",
 )
+@click.option(
+    "-am",
+    "--allow-missing",
+    is_flag=True,
+    help="Skip missing input files",
+)
 
-def main(inputfiles, outputfile, jobs_config, force):
+def main(inputfiles, outputfile, jobs_config, force, allow_missing):
     '''Merge coffea output files'''
-    merge_outputs(inputfiles, outputfile, jobs_config, force)
+    merge_outputs(inputfiles, outputfile, jobs_config, force, allow_missing)
 
 if __name__ == "__main__":
     main()
